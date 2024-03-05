@@ -1,0 +1,7 @@
+*
+!.gitignore
+!configuration.yaml
+
+!automations.yaml
+!scenes.yaml
+!scripts.yaml

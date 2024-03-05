@@ -1,0 +1,12 @@
+http:
+  routers:
+    spotify-http:
+      entrypoints: "web"
+      rule: "Host(`spotify.local`)"
+      service: "spotify@file"
+        
+  services:
+    spotify:
+      loadbalancer:
+        servers:
+          - url: "http://10.123.0.1:20300" # running on the host, access via bridge network

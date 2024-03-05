@@ -1,0 +1,26 @@
+version: '3'
+services:
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt:1.35.1 # https://github.com/Koenkk/zigbee2mqtt/releases
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    networks:
+      macvlan0:
+        ipv4_address: 192.168.0.212
+    ports:
+      - 80:80
+    dns:
+      - 192.168.0.220
+      - 208.67.222.222 # fallback OpenDNS
+    volumes:
+      - ./data:/app/data
+      #- "/run/udev:/run/udev:ro" # there is no udev on my busybox host
+    environment:
+      - TZ=Europe/Vienna
+
+networks:
+  macvlan0:   # externally created network
+    external: true
+   

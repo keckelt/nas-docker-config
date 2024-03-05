@@ -1,0 +1,67 @@
+- id: '1706383379860'
+  alias: Auto Restart
+  description: Roboter Re-Start nach Error
+  trigger:
+  - platform: state
+    entity_id:
+    - sensor.valetudo_roborock_error
+    from: No error
+  condition:
+  - condition: and
+    conditions:
+    - condition: or
+      conditions:
+      - condition: time
+        after: 06:00:00
+        before: '22:00:00'
+        weekday:
+        - mon
+        - tue
+        - wed
+        - thu
+      - condition: time
+        after: 09:00:00
+        before: '23:00:00'
+        weekday:
+        - fri
+        - sat
+        - sun
+    - condition: not
+      conditions:
+      - condition: state
+        entity_id: sensor.valetudo_roborock_error
+        state: unavailable
+      - condition: state
+        entity_id: sensor.valetudo_roborock_error
+        state: unknown
+  action:
+  - delay:
+      hours: 0
+      minutes: 0
+      seconds: 5
+      milliseconds: 0
+  - device_id: 00bc6d56535270a3dd86c316fa9e880b
+    domain: vacuum
+    entity_id: c9ae016bfbc6526074649e1c7d12b297
+    type: clean
+  - delay: 60
+  mode: single
+  max_exceeded: silent
+- id: '1706594651276'
+  alias: Tablet Akku Benachrichtigung
+  description: ''
+  trigger:
+  - type: battery_level
+    platform: device
+    device_id: b641fe0c738b78436ec088e853669c6e
+    entity_id: 4894ea5b6a4aa13cab9bc456da26623b
+    domain: sensor
+    below: 30
+  condition: []
+  action:
+  - device_id: fa03035573d50ecc1abb1d1e97198496
+    domain: mobile_app
+    type: notify
+    message: Tablet-Akku unter 30%.
+    title: Tablet laden
+  mode: single

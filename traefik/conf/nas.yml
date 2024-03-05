@@ -1,0 +1,19 @@
+http:
+  routers:
+    asustor-http:
+      entrypoints: "web"
+      rule: "Host(`nas.local`)"
+      service: "asustor@file"
+
+    # asustor-https:
+    #   entrypoints: "websecure"
+    #   rule: "Host(`nas.local`)"
+    #   service: "asustor@file"
+    #   tls:
+    #     certresolver: "myresolver"
+        
+  services:
+    asustor:
+      loadbalancer:
+        servers:
+          - url: "http://10.123.0.1:888" # running on the host, access via bridge network

@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:2024.01.0
+    hostname: pihole
+    restart: always
+    cap_add: 
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    networks:
+      macvlan0: # same as network specified below
+        ipv4_address: 192.168.0.220 # the IP of the pihole container
+    ports: # expose all pihole ports.
+      - 443/tcp
+      - 53/tcp
+      - 53/udp
+      - 67/udp
+      - 80/tcp
+    dns: # configure DNS server
+      #- 127.0.0.1 # use local DNS (pihole) - disabled for now because this host is running just pi hole anyway
+      - 208.67.222.222 # instead use OpenDNS
+      - 1.1.1.1 # optional fallback DNS
+    volumes: # mount our data volumes.
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+      - './backups/:/backups/' # backups explained later
+    environment: # set variables for pihole configuration.
+      WEBPASSWORD: "🤫"
+      TZ: 'Europe/Vienna' # pick your timezone
+      # DNS provider in reverse order (last one is the first one to be used)
+      PIHOLE_DNS_: "1.1.1.1;208.67.222.222" # remove if you want to set it via the web interface (service restarts will overwrite any changes made there)
+      DHCP_ACTIVE: "false" # Will enable the DHCP server manually from the interface when ready
+      DHCP_START: 192.168.0.101
+      DHCP_END: 192.168.0.199
+      DHCP_ROUTER: 192.168.0.1
+      DHCP_LEASETIME: 24 # in hours: 0 = infinite, 24 = one day, 168 = one week, 744 = one month, 8760 = one year
+      # With (samsung?) android phones/tables using random MAC addreses by default, a shorter lease time may be better to not run out of IP addresses
+
+networks:
+  macvlan0:   # externally created network (later in article)
+    external: true

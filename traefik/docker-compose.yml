@@ -1,0 +1,68 @@
+version: '3.0'
+services:
+  traefik:
+    image: "traefik:v2.8"
+    container_name: "traefik"
+    hostname: traefik
+    restart: "always"
+    networks:
+      macvlan0:
+        ipv4_address: 192.168.0.209 # ip of the container in the local network (not reachable from the host)
+      hostbridge:
+        ipv4_address: 10.123.0.2 # this is the IP by which the container is reachable from the host via the bridge network
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+      - "--api.dashboard=true"
+
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+
+      ## Default Ports for HTTP and HTTPS
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+
+      ## Set up Let's Encrypt
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=klaus@eckelt.info"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+
+      # REDIRECT HTTP to HTTPS:
+      #- "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      #- "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+
+      # READ ADDITIONAL CONFIGURATION FROM FILE
+      - "--providers.file.directory=/etc/traefik/conf"
+    labels:
+      - "traefik.enable=true"
+      ## Traefik Routing: traefik.http.routers.traefik.CONTAINERNAME.SETTING=VALUE
+      ## Dashbaord 
+      - "traefik.http.routers.traefik.rule=Host(`fik.local`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.services.bastard.loadbalancer.server.port=19232" # dummy service because the port can not be automatically be detected in macvlan network mode, see https://github.com/traefik/traefik/issues/5732 and https://stackoverflow.com/q/73257116/2549748
+
+      # Need to certificate for the dashboard
+      #- "traefik.http.routers.traefik.tls.certresolver=myresolver"
+      # Basic Auth for the dashboard, bcrypt hased pw using https://bcrypt-generator.com/
+      - "traefik.http.routers.traefik.middlewares=traefik-basic-auth"
+      - "traefik.http.middlewares.traefik-basic-auth.basicauth.users=klaus:$$2a$$12$$vJ5RuXrTkNSplToQFKhXhOCknWWr84RbdvXNUEIlsNccYFeFgxuUi "
+      # more info: https://jensknipper.de/blog/basic-authentication-with-traefik/
+    volumes:
+      - "./conf:/etc/traefik/conf"
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+networks:
+  macvlan0:   # externally created network
+    external: true
+  # in macvlan mode, the traefik container can not access the host network
+  # so we also need to create a bridge network
+  # see https://stackoverflow.com/a/67835834/2549748
+  hostbridge: # only used to access the host with this container, can be defined in this compose file
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.123.0.0/24
+        #- gateway: 10.123.0.1 # this is the IP by which the host is reachable via the bridge network

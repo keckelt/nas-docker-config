@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+  server:
+    image: yooooomi/your_spotify_server
+    restart: always
+    ports:
+      - "20380:8080"
+    links:
+      - mongo
+    depends_on:
+      - mongo
+    environment:
+      API_ENDPOINT: http://192.168.0.10:20380 # This MUST be included as a valid URL in the spotify dashboard (see below)
+      CLIENT_ENDPOINT: http://192.168.0.10:20300
+      SPOTIFY_PUBLIC: 0d485e2c013a4547bdbd75abd53bff1b # Client ID
+      SPOTIFY_SECRET: 🤫 # Client Secret
+      
+  mongo:
+    container_name: mongo
+    image: mongo:4
+    restart: always
+    volumes:
+      - ./your_spotify_db:/data/db
+
+  web:
+    image: yooooomi/your_spotify_client
+    restart: always
+    ports:
+      - "20300:3000"    
+    depends_on:
+      - server
+    environment:
+      API_ENDPOINT: http://192.168.0.10:20380

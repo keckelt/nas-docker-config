@@ -1,0 +1,23 @@
+homeassistant: true
+frontend:
+  port: 80
+  url: http://192.168.0.212:80
+permit_join: true
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://192.168.0.211
+serial:
+  port: /dev/ttyACM0
+  adapter: ezsp
+devices:
+  '0x001788010445fab7':
+    friendly_name: Lampe Badewanne
+  '0x0017880110395a5c':
+    friendly_name: Dimmer Badewanne
+  '0x00178801086ac954':
+    friendly_name: Dimmer SZ
+  '0x001788010b81735e':
+    friendly_name: Lampe SZ
+advanced:
+  log_level: info
+groups: {}

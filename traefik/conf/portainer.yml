@@ -1,0 +1,19 @@
+http:
+  routers:
+    portainer-http:
+      entrypoints: "web"
+      rule: "Host(`portainer.local`)"
+      service: "portainer@file"
+
+    # portainer-https:
+    #   entrypoints: "websecure"
+    #   rule: "Host(`portainer.local`)"
+    #   service: "portainer@file"
+    #   tls:
+    #     certresolver: "myresolver"
+        
+  services:
+    portainer:
+      loadbalancer:
+        servers:
+          - url: "http://10.123.0.1:19900" # running on the host, access via bridge network

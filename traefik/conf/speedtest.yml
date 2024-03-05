@@ -1,0 +1,12 @@
+http:
+  routers:
+    speedtest-http:
+      entrypoints: "web" 
+      rule: "Host(`speed.local`)"
+      service: "speedtest@file"
+
+  services:
+    speedtest:
+      loadbalancer:
+        servers:
+          - url: "http://10.123.0.1:32180" # running on the host, access via bridge network

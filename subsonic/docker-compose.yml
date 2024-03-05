@@ -1,0 +1,11 @@
+version: '3.0'
+services:
+  nginx:
+    image: 	gzurowski/subsonic:6.1.6
+    restart: unless-stopped
+    ports:
+      - 4040:4040
+    volumes:
+      - /volume1/Musik/:/var/music:ro
+      - ./subsonic:/var/subsonic
+      

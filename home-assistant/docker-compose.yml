@@ -1,0 +1,40 @@
+version: '3'
+services:
+  homeassistant:
+    image: "ghcr.io/home-assistant/home-assistant:2024.1"
+    restart: unless-stopped
+    #privileged: true
+    networks:
+      macvlan0:
+        ipv4_address: 192.168.0.210
+    ports:
+      - 80/tcp
+    dns:
+      - 192.168.0.220
+      - 208.67.222.222 # fallback OpenDNS
+    volumes:
+      - ./config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    labels:
+        - "traefik.enable=true"
+        # HTTP rule
+        - "traefik.http.routers.home-eckelt-info-http.rule=Host(`home.eckelt.info`)"
+        - "traefik.http.routers.home-eckelt-info-http.service=home-eckelt-info"
+        - "traefik.http.routers.home-eckelt-info-http.entrypoints=web"
+
+        # HTTPs rule
+        - "traefik.http.routers.home-eckelt-info-https.rule=Host(`home.eckelt.info`)"
+        - "traefik.http.routers.home-eckelt-info-https.service=home-eckelt-info"
+        - "traefik.http.routers.home-eckelt-info-https.entrypoints=websecure"
+        - "traefik.http.routers.home-eckelt-info-https.tls.certresolver=myresolver"
+
+        - "traefik.http.services.home-eckelt-info.loadbalancer.server.port=80"
+
+
+#mosquitto: see https://iotechonline.com/home-assistant-install-with-docker-compose/
+
+
+networks:
+  macvlan0:   # externally created network
+    external: true

@@ -1,0 +1,7 @@
+*
+!.gitignore
+
+# Only keep relevant files
+!adlists.list
+!custom.list
+!dns-servers.conf

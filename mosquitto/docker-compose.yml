@@ -1,0 +1,25 @@
+version: '3'
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: unless-stopped
+    networks:
+      macvlan0:
+        ipv4_address: 192.168.0.211
+    ports:
+      - 1883:1883
+    dns:
+      - 192.168.0.220
+      - 208.67.222.222 # fallback OpenDNS
+    volumes:
+      - "./config:/mosquitto/config"
+      - "./data:/mosquitto/data"
+      - "./log:/mosquitto/log"
+    environment:
+      - TZ=Europe/Vienna
+
+
+networks:
+  macvlan0:   # externally created network
+    external: true
